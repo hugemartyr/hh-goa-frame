@@ -281,11 +281,12 @@ export function renderPfp(ctx: CanvasRenderingContext2D, data: CardData, S: numb
   ctx.stroke();
 
   // corner motifs
-  const m = 118 * u;
-  cornerMotif(ctx, 100 * u, 100 * u, m, Math.PI);
-  cornerMotif(ctx, S - 100 * u, 100 * u, m, -Math.PI / 2);
-  cornerMotif(ctx, S - 100 * u, S - 100 * u, m, 0);
-  cornerMotif(ctx, 100 * u, S - 100 * u, m, Math.PI / 2);
+  const m = 92 * u;
+  const c = 122 * u;
+  cornerMotif(ctx, c, c, m, Math.PI);
+  cornerMotif(ctx, S - c, c, m, -Math.PI / 2);
+  cornerMotif(ctx, S - c, S - c, m, 0);
+  cornerMotif(ctx, c, S - c, m, Math.PI / 2);
 
   // top eyebrow
   ctx.textAlign = "center";
@@ -434,8 +435,8 @@ export function renderCard(ctx: CanvasRenderingContext2D, data: CardData, W: num
   ctx.fillText("HHGOA.COM", W - pad, H - 96 * u);
   ctx.letterSpacing = "0px";
 
-  cornerMotif(ctx, 96 * u, 96 * u, 66 * u, Math.PI);
-  cornerMotif(ctx, W - 96 * u, H - 96 * u, 66 * u, 0);
+  cornerMotif(ctx, 110 * u, 110 * u, 52 * u, Math.PI);
+  cornerMotif(ctx, W - 110 * u, H - 110 * u, 52 * u, 0);
 }
 
 export type Format = "pfp" | "card";

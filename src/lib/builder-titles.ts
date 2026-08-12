@@ -33,5 +33,5 @@ function hash(input: string) {
 /** Deterministic title from a seed (name + stack), shifted by `nudge` on shuffle. */
 export function pickBuilderTitle(seed: string, nudge = 0) {
   const base = seed.trim().length ? hash(seed.toLowerCase()) : 7;
-  return BUILDER_TITLES[(base + nudge) % BUILDER_TITLES.length];
+  return BUILDER_TITLES[(base + nudge) % BUILDER_TITLES.length] ?? BUILDER_TITLES[0]!;
 }

@@ -99,3 +99,10 @@ export function drawPhotoCover(
   const clampedY = Math.min(y, Math.max(y + h - dh, dy));
   ctx.drawImage(photo.bitmap as CanvasImageSource, clampedX, clampedY, dw, dh);
 }
+
+/** Loads a bundled/remote image URL through the same pipeline (used for the demo card). */
+export async function loadPhotoFromUrl(url: string): Promise<LoadedPhoto> {
+  const res = await fetch(url);
+  const blob = await res.blob();
+  return loadPhoto(new File([blob], "demo.jpg", { type: blob.type || "image/jpeg" }));
+}

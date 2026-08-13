@@ -330,120 +330,254 @@ export function renderPfp(ctx: CanvasRenderingContext2D, data: CardData, S: numb
   diamondRow(ctx, S - inset - ruleW, chipY, ruleW, 9 * u, PALETTE.gold);
 }
 
-/* ---------- format B: builder ID card ---------- */
+/* ---------- format B: builder ID card (quirky Goa pass) ---------- */
 
 export function renderCard(ctx: CanvasRenderingContext2D, data: CardData, W: number, H: number) {
   const u = W / 1200;
-  backdrop(ctx, W, H);
+  const seed = seedFrom((data.name || "builder") + (data.stack || ""));
 
+  // base
+  ctx.fillStyle = PALETTE.green;
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "rgba(255,201,60,0.05)";
+  for (let i = 0; i < 260; i++) {
+    const px = ((i * 173.7) % W) + ((i * 37) % 9);
+    const py = ((i * 397.3) % H) + ((i * 11) % 7);
+    ctx.fillRect(px, py, 3 * u, 3 * u);
+  }
+
+  // gold badge outline + lanyard slot
+  ctx.save();
+  roundRect(ctx, 22 * u, 22 * u, W - 44 * u, H - 44 * u, 54 * u);
   ctx.strokeStyle = PALETTE.gold;
   ctx.lineWidth = 12 * u;
-  ctx.strokeRect(26 * u, 26 * u, W - 52 * u, H - 52 * u);
-  ctx.strokeStyle = "rgba(255,61,139,0.7)";
-  ctx.lineWidth = 4 * u;
-  ctx.strokeRect(50 * u, 50 * u, W - 100 * u, H - 100 * u);
-
-  const pad = 92 * u;
-  const inner = W - pad * 2;
-
-  // header
-  ctx.textBaseline = "middle";
-  ctx.textAlign = "left";
-  ctx.fillStyle = PALETTE.gold;
-  ctx.font = `${52 * u}px ${DISPLAY}`;
-  setLetterSpacing(ctx, `${2 * u}px`);
-  ctx.fillText("HH GOA", pad, 126 * u);
-  const hhW = ctx.measureText("HH GOA").width;
-  ctx.fillStyle = PALETTE.pink;
-  ctx.fillText("2026", pad + hhW + 16 * u, 126 * u);
-  setLetterSpacing(ctx, "0px");
-
-  ctx.textAlign = "right";
-  ctx.font = `${24 * u}px ${BODY}`;
-  setLetterSpacing(ctx, `${8 * u}px`);
-  ctx.fillStyle = PALETTE.goldSoft;
-  ctx.fillText("BUILDER ID", W - pad, 126 * u);
-  setLetterSpacing(ctx, "0px");
-
-  scallopRow(ctx, pad, 176 * u, inner, 16 * u, "rgba(255,201,60,0.3)", true);
-
-  // photo
-  const photoY = 216 * u;
-  const photoH = 620 * u;
-  ctx.save();
-  ctx.shadowColor = "rgba(0,0,0,0.45)";
-  ctx.shadowBlur = 40 * u;
-  ctx.shadowOffsetY = 14 * u;
-  roundRect(ctx, pad, photoY, inner, photoH, 36 * u);
-  ctx.fillStyle = PALETTE.deep;
-  ctx.fill();
+  ctx.stroke();
+  roundRect(ctx, 44 * u, 44 * u, W - 88 * u, H - 88 * u, 40 * u);
+  ctx.strokeStyle = "rgba(255,246,230,0.35)";
+  ctx.lineWidth = 3 * u;
+  ctx.stroke();
   ctx.restore();
-  photoBlock(ctx, data.photos, pad, photoY, inner, photoH, 36 * u);
-  roundRect(ctx, pad, photoY, inner, photoH, 36 * u);
-  ctx.strokeStyle = PALETTE.gold;
-  ctx.lineWidth = 8 * u;
+
+  roundRect(ctx, W / 2 - 90 * u, 62 * u, 180 * u, 34 * u, 17 * u);
+  ctx.fillStyle = PALETTE.cream;
+  ctx.fill();
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 4 * u;
   ctx.stroke();
 
-  // title banner overlapping photo
-  const bannerH = 96 * u;
-  const bannerY = photoY + photoH - bannerH / 2;
-  roundRect(ctx, pad + 24 * u, bannerY, inner - 48 * u, bannerH, bannerH / 2);
-  ctx.fillStyle = PALETTE.gold;
-  ctx.fill();
+  bunting(ctx, 70 * u, 118 * u, W - 140 * u, 46 * u);
+
+  /* ---- wordmark: HACKER गोवा HOUSE ---- */
+  const wmY = 300 * u;
+  ctx.textBaseline = "middle";
   ctx.textAlign = "center";
-  ctx.fillStyle = PALETTE.deep;
-  const tSize = fitText(ctx, data.title, inner - 130 * u, 46 * u, DISPLAY, 22);
-  ctx.font = `${tSize}px ${DISPLAY}`;
-  setLetterSpacing(ctx, `${tSize * 0.06}px`);
-  ctx.fillText(data.title, W / 2, bannerY + bannerH / 2 + 2 * u);
-  setLetterSpacing(ctx, "0px");
+  const wmSize = 116 * u;
+  ctx.font = `${wmSize}px ${DISPLAY}`;
+  const gap = 210 * u;
+  const leftW = ctx.measureText("HACKER").width;
+  const rightW = ctx.measureText("HOUSE").width;
+  const totalW = leftW + rightW + gap;
+  const startX = W / 2 - totalW / 2;
 
-  // name
-  const name = (data.name || "YOUR NAME").toUpperCase();
   ctx.textAlign = "left";
-  ctx.fillStyle = PALETTE.cream;
-  const nSize = fitText(ctx, name, inner, 104 * u, DISPLAY, 34);
-  ctx.font = `${nSize}px ${DISPLAY}`;
-  const nameY = bannerY + bannerH + 92 * u;
-  ctx.fillText(name, pad, nameY);
+  ctx.fillStyle = INK;
+  ctx.fillText("HACKER", startX + 5 * u, wmY + 6 * u);
+  ctx.fillText("HOUSE", startX + leftW + gap + 5 * u, wmY + 6 * u);
+  ctx.fillStyle = PALETTE.gold;
+  ctx.fillText("HACKER", startX, wmY);
+  ctx.fillText("HOUSE", startX + leftW + gap, wmY);
 
-  // stack
+  // pink Devanagari chip
+  ctx.font = `${74 * u}px ${DEVA}`;
+  ctx.textAlign = "center";
+  const chipCx = startX + leftW + gap / 2;
+  const dW = ctx.measureText("गोवा").width + 46 * u;
+  roundRect(ctx, chipCx - dW / 2, wmY - 56 * u, dW, 112 * u, 46 * u);
   ctx.fillStyle = PALETTE.pink;
-  const stack = (data.stack || "BUILDER").toUpperCase();
-  const sSize = fitText(ctx, stack, inner, 34 * u, BODY, 18);
-  ctx.font = `${sSize}px ${BODY}`;
-  setLetterSpacing(ctx, `${sSize * 0.16}px`);
-  ctx.fillText(stack, pad, nameY + 66 * u);
-  setLetterSpacing(ctx, "0px");
+  ctx.fill();
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 6 * u;
+  ctx.stroke();
+  ctx.fillStyle = PALETTE.cream;
+  ctx.fillText("गोवा", chipCx, wmY + 4 * u);
 
-  // badges
-  const badgeY = nameY + 116 * u;
-  const w1 = tag(ctx, "#FRAMEINGOA", pad, badgeY, 24 * u, "rgba(255,201,60,0.16)", PALETTE.gold);
-  tag(
-    ctx,
-    (data.photos || []).filter(Boolean).length > 1 ? "TEAM FRAME" : "VERIFIED BUILDER",
-    pad + w1 + 18 * u,
-    badgeY,
-    24 * u,
-    "rgba(255,61,139,0.18)",
-    PALETTE.pink,
-  );
-
-  // footer
-  diamondRow(ctx, pad, H - 148 * u, inner, 8 * u, "rgba(255,201,60,0.55)");
-  ctx.textAlign = "left";
-  ctx.font = `${24 * u}px ${BODY}`;
+  // dates + tagline
+  ctx.font = `${28 * u}px ${MONO}`;
   setLetterSpacing(ctx, `${6 * u}px`);
   ctx.fillStyle = PALETTE.goldSoft;
-  ctx.fillText("HACKER HOUSE GOA", pad, H - 96 * u);
-  ctx.textAlign = "right";
-  ctx.fillStyle = "rgba(255,246,230,0.6)";
-  ctx.fillText("HHGOA.COM", W - pad, H - 96 * u);
+  ctx.fillText("GOA, INDIA  ·  28–31 OCT 2026", W / 2, 386 * u);
+  ctx.fillStyle = "rgba(255,201,60,0.75)";
+  ctx.font = `${24 * u}px ${MONO}`;
+  ctx.fillText("LESS NOISE. MORE SIGNAL.", W / 2, 428 * u);
   setLetterSpacing(ctx, "0px");
 
-  cornerMotif(ctx, 110 * u, 110 * u, 52 * u, Math.PI);
-  cornerMotif(ctx, W - 110 * u, H - 110 * u, 52 * u, 0);
+  /* ---- scenery + photo arch ---- */
+  const archW = 560 * u;
+  const archX = W / 2 - archW / 2;
+  const archY = 500 * u;
+  const archH = 620 * u;
+
+  sunburst(ctx, W / 2, archY + 30 * u, 150 * u);
+
+  palmTree(ctx, 190 * u, 1170 * u, 420 * u);
+  palmTree(ctx, W - 190 * u, 1170 * u, 420 * u, true);
+
+  // photo window
+  ctx.save();
+  archPath(ctx, archX, archY, archW, archH);
+  ctx.fillStyle = PALETTE.deep;
+  ctx.fill();
+  ctx.clip();
+  const list = (data.photos || []).filter((p) => Boolean(p && p.bitmap)).slice(0, 3);
+  const pgap = list.length > 1 ? archW * 0.02 : 0;
+  const cellW = list.length ? (archW - pgap * (list.length - 1)) / list.length : archW;
+  list.forEach((p, i) => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(archX + i * (cellW + pgap), archY, cellW, archH);
+    ctx.clip();
+    drawPhotoCover(ctx, p, archX + i * (cellW + pgap), archY, cellW, archH);
+    ctx.restore();
+  });
+  ctx.restore();
+
+  // arch frame: cream band + gold keyline + ink outline
+  archPath(ctx, archX - 16 * u, archY - 16 * u, archW + 32 * u, archH + 16 * u);
+  ctx.strokeStyle = PALETTE.cream;
+  ctx.lineWidth = 26 * u;
+  ctx.stroke();
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 6 * u;
+  ctx.stroke();
+  archPath(ctx, archX, archY, archW, archH);
+  ctx.strokeStyle = PALETTE.gold;
+  ctx.lineWidth = 7 * u;
+  ctx.stroke();
+
+  // twisted columns
+  [archX - 30 * u, archX + archW + 30 * u].forEach((cx) => {
+    ctx.save();
+    ctx.strokeStyle = PALETTE.gold;
+    ctx.lineWidth = 8 * u;
+    ctx.lineCap = "round";
+    for (let y = archY + archW / 2; y < archY + archH; y += 26 * u) {
+      ctx.beginPath();
+      ctx.moveTo(cx - 12 * u, y);
+      ctx.lineTo(cx + 12 * u, y + 16 * u);
+      ctx.stroke();
+    }
+    ctx.restore();
+  });
+
+  // scallop crown on the arch
+  scallopRow(ctx, archX + 40 * u, archY + 6 * u, archW - 80 * u, 20 * u, "rgba(255,201,60,0.5)", true);
+
+  // sea + sand under the arch, plus scooter
+  seaBand(ctx, 78 * u, 1122 * u, W - 156 * u, 56 * u);
+  scooter(ctx, W / 2 + 210 * u, 1196 * u, 92 * u);
+  hibiscus(ctx, 120 * u, 1010 * u, 46 * u);
+  hibiscus(ctx, W - 116 * u, 950 * u, 38 * u, PALETTE.gold);
+
+  /* ---- name plate ---- */
+  const plateY = 1216 * u;
+  const plateH = 108 * u;
+  roundRect(ctx, 90 * u, plateY, W - 180 * u, plateH, 24 * u);
+  ctx.fillStyle = PALETTE.cream;
+  ctx.fill();
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 6 * u;
+  ctx.stroke();
+
+  const name = (data.name || "YOUR NAME").toUpperCase();
+  ctx.textAlign = "center";
+  const nSize = fitText(ctx, name, W - 260 * u, 74 * u, DISPLAY, 28);
+  ctx.font = `${nSize}px ${DISPLAY}`;
+  ctx.fillStyle = PALETTE.green;
+  ctx.fillText(name, W / 2, plateY + plateH / 2 + 4 * u);
+
+  // pink title ribbon
+  const ribH = 74 * u;
+  const ribY = plateY + plateH + 18 * u;
+  roundRect(ctx, 150 * u, ribY, W - 300 * u, ribH, ribH / 2);
+  ctx.fillStyle = PALETTE.pink;
+  ctx.fill();
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 5 * u;
+  ctx.stroke();
+  const tSize = fitText(ctx, data.title || "UNPLACED", W - 420 * u, 42 * u, DISPLAY, 20);
+  ctx.font = `${tSize}px ${DISPLAY}`;
+  setLetterSpacing(ctx, `${tSize * 0.05}px`);
+  ctx.fillStyle = PALETTE.gold;
+  ctx.fillText(data.title || "UNPLACED", W / 2, ribY + ribH / 2 + 3 * u);
+  setLetterSpacing(ctx, "0px");
+
+  /* ---- data row: stack + builder id ---- */
+  const rowY = ribY + ribH + 62 * u;
+  ctx.font = `${22 * u}px ${MONO}`;
+  setLetterSpacing(ctx, `${4 * u}px`);
+  ctx.fillStyle = "rgba(255,246,230,0.7)";
+  ctx.fillText("STACK / ROLE", W * 0.31, rowY);
+  ctx.fillText("BUILDER ID", W * 0.69, rowY);
+  setLetterSpacing(ctx, "0px");
+
+  ctx.strokeStyle = "rgba(255,201,60,0.5)";
+  ctx.lineWidth = 2 * u;
+  ctx.setLineDash([8 * u, 8 * u]);
+  ctx.beginPath();
+  ctx.moveTo(W * 0.31 - 170 * u, rowY + 22 * u);
+  ctx.lineTo(W * 0.31 + 170 * u, rowY + 22 * u);
+  ctx.moveTo(W * 0.69 - 170 * u, rowY + 22 * u);
+  ctx.lineTo(W * 0.69 + 170 * u, rowY + 22 * u);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  const stack = (data.stack || "BUILDER").toUpperCase();
+  ctx.fillStyle = PALETTE.gold;
+  const stSize = fitText(ctx, stack, 330 * u, 36 * u, MONO, 16);
+  ctx.font = `${stSize}px ${MONO}`;
+  ctx.fillText(stack, W * 0.31, rowY + 58 * u);
+  const idCode = `HH-GOA-${String(seed % 10000).padStart(4, "0")}`;
+  ctx.font = `${34 * u}px ${MONO}`;
+  ctx.fillText(idCode, W * 0.69, rowY + 58 * u);
+
+  /* ---- footer strip ---- */
+  qrBlock(ctx, 108 * u, H - 250 * u, 132 * u, seed);
+  barcode(ctx, W - 350 * u, H - 236 * u, 230 * u, 76 * u, seed + 11);
+  ctx.font = `${20 * u}px ${MONO}`;
+  setLetterSpacing(ctx, `${5 * u}px`);
+  ctx.fillStyle = PALETTE.goldSoft;
+  ctx.textAlign = "center";
+  ctx.fillText("★ BUILDER PASS ★", W - 235 * u, H - 258 * u);
+  ctx.fillText(
+    (data.photos || []).filter(Boolean).length > 1 ? "TEAM FRAME" : "VERIFIED BUILDER",
+    W / 2,
+    H - 250 * u,
+  );
+  setLetterSpacing(ctx, "0px");
+  ctx.fillStyle = "rgba(255,201,60,0.85)";
+  ctx.font = `${26 * u}px ${MONO}`;
+  ctx.fillText("HH-GOA-2026", W / 2, H - 200 * u);
+
+  const stripH = 76 * u;
+  roundRect(ctx, 44 * u, H - stripH - 46 * u, W - 88 * u, stripH, 34 * u);
+  ctx.fillStyle = PALETTE.pink;
+  ctx.fill();
+  ctx.font = `${24 * u}px ${MONO}`;
+  setLetterSpacing(ctx, `${5 * u}px`);
+  ctx.fillStyle = PALETTE.gold;
+  const sy = H - 46 * u - stripH / 2 + 2 * u;
+  ctx.textAlign = "left";
+  ctx.fillText("HHGOA.COM", 100 * u, sy);
+  ctx.textAlign = "center";
+  ctx.fillStyle = PALETTE.cream;
+  ctx.fillText("#FRAMEINGOA", W / 2, sy);
+  ctx.textAlign = "right";
+  ctx.fillStyle = PALETTE.gold;
+  ctx.fillText("28–31 OCT 2026", W - 100 * u, sy);
+  setLetterSpacing(ctx, "0px");
+  ctx.textAlign = "left";
 }
+
 
 export type Format = "pfp" | "card";
 

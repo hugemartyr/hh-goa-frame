@@ -420,22 +420,22 @@ export function renderCard(ctx: CanvasRenderingContext2D, data: CardData, W: num
   ctx.font = `${28 * u}px ${MONO}`;
   setLetterSpacing(ctx, `${6 * u}px`);
   ctx.fillStyle = PALETTE.goldSoft;
-  ctx.fillText("GOA, INDIA  ·  28–31 OCT 2026", W / 2, 386 * u);
+  ctx.fillText("GOA, INDIA  ·  28–31 OCT 2026", W / 2, 390 * u);
   ctx.fillStyle = "rgba(255,201,60,0.75)";
   ctx.font = `${24 * u}px ${MONO}`;
-  ctx.fillText("LESS NOISE. MORE SIGNAL.", W / 2, 428 * u);
+  ctx.fillText("LESS NOISE. MORE SIGNAL.", W / 2, 432 * u);
   setLetterSpacing(ctx, "0px");
 
   /* ---- scenery + photo arch ---- */
-  const archW = 560 * u;
+  const archW = 540 * u;
   const archX = W / 2 - archW / 2;
   const archY = 500 * u;
-  const archH = 620 * u;
+  const archH = 540 * u;
 
-  sunburst(ctx, W / 2, archY + 30 * u, 150 * u);
+  sunburst(ctx, W / 2, archY + 160 * u, 105 * u);
 
-  palmTree(ctx, 190 * u, 1170 * u, 420 * u);
-  palmTree(ctx, W - 190 * u, 1170 * u, 420 * u, true);
+  palmTree(ctx, 150 * u, 1078 * u, 330 * u);
+  palmTree(ctx, W - 150 * u, 1078 * u, 330 * u, true);
 
   // photo window
   ctx.save();
@@ -488,14 +488,14 @@ export function renderCard(ctx: CanvasRenderingContext2D, data: CardData, W: num
   scallopRow(ctx, archX + 40 * u, archY + 6 * u, archW - 80 * u, 20 * u, "rgba(255,201,60,0.5)", true);
 
   // sea + sand under the arch, plus scooter
-  seaBand(ctx, 78 * u, 1122 * u, W - 156 * u, 56 * u);
-  scooter(ctx, W / 2 + 210 * u, 1196 * u, 92 * u);
-  hibiscus(ctx, 120 * u, 1010 * u, 46 * u);
-  hibiscus(ctx, W - 116 * u, 950 * u, 38 * u, PALETTE.gold);
+  seaBand(ctx, 78 * u, 1046 * u, W - 156 * u, 44 * u);
+  scooter(ctx, W / 2 + 190 * u, 1104 * u, 76 * u);
+  hibiscus(ctx, 112 * u, 940 * u, 42 * u);
+  hibiscus(ctx, W - 108 * u, 880 * u, 34 * u, PALETTE.gold);
 
   /* ---- name plate ---- */
-  const plateY = 1216 * u;
-  const plateH = 108 * u;
+  const plateY = 1128 * u;
+  const plateH = 100 * u;
   roundRect(ctx, 90 * u, plateY, W - 180 * u, plateH, 24 * u);
   ctx.fillStyle = PALETTE.cream;
   ctx.fill();
@@ -511,8 +511,8 @@ export function renderCard(ctx: CanvasRenderingContext2D, data: CardData, W: num
   ctx.fillText(name, W / 2, plateY + plateH / 2 + 4 * u);
 
   // pink title ribbon
-  const ribH = 74 * u;
-  const ribY = plateY + plateH + 18 * u;
+  const ribH = 64 * u;
+  const ribY = plateY + plateH + 14 * u;
   roundRect(ctx, 150 * u, ribY, W - 300 * u, ribH, ribH / 2);
   ctx.fillStyle = PALETTE.pink;
   ctx.fill();

@@ -1,4 +1,17 @@
 import { drawPhotoCover, type LoadedPhoto } from "./image";
+import {
+  INK,
+  archPath,
+  barcode,
+  bunting,
+  hibiscus,
+  palmTree,
+  qrBlock,
+  scooter,
+  seaBand,
+  seedFrom,
+  sunburst,
+} from "./goa-art";
 
 export const PALETTE = {
   deep: "#04231A",
@@ -12,6 +25,8 @@ export const PALETTE = {
 
 const DISPLAY = '"Anton", "Arial Black", sans-serif';
 const BODY = '"Space Grotesk", "Helvetica Neue", sans-serif';
+const MONO = '"JetBrains Mono", ui-monospace, monospace';
+const DEVA = '"Baloo 2", "Noto Sans Devanagari", sans-serif';
 
 export type CardData = {
   photos: LoadedPhoto[];

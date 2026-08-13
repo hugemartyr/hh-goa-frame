@@ -4,6 +4,7 @@ import {
   IdCard,
   ImagePlus,
   Loader2,
+  Printer,
   RefreshCw,
   Shuffle,
   Sparkles,
@@ -24,9 +25,11 @@ const SHARE_TEXT =
 type Props = {
   format: Format;
   onFormatChange: (f: Format) => void;
+  externalPhotos?: LoadedPhoto[];
+  onStartOver?: () => void;
 };
 
-export function FrameStudio({ format, onFormatChange }: Props) {
+export function FrameStudio({ format, onFormatChange, externalPhotos, onStartOver }: Props) {
   const [photos, setPhotos] = useState<LoadedPhoto[]>([]);
   const [name, setName] = useState("");
   const [stack, setStack] = useState("");
@@ -35,6 +38,26 @@ export function FrameStudio({ format, onFormatChange }: Props) {
   const [dragging, setDragging] = useState(false);
   const [exporting, setExporting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleStartOver = () => {
+    setPhotos([]);
+    setName("");
+    setStack("");
+    setNudge(0);
+    if (onStartOver) onStartOver();
+  };
+
+  useEffect(() => {
+    if (externalPhotos && externalPhotos.length > 0) {
+      setPhotos((prev) => {
+        const combined = [...prev, ...externalPhotos];
+        const unique = combined.filter(
+          (p, index, self) => index === self.findIndex((t) => t.previewUrl === p.previewUrl),
+        );
+        return unique.slice(0, 3);
+      });
+    }
+  }, [externalPhotos]);
 
   const title = useMemo(() => pickBuilderTitle(`${name}|${stack}`, nudge), [name, stack, nudge]);
   const data: CardData = useMemo(
@@ -100,81 +123,36 @@ export function FrameStudio({ format, onFormatChange }: Props) {
     }
   };
 
-  const shareToX = async () => {
+  const printBadge = async () => {
     setExporting(true);
     try {
       const canvas = document.createElement("canvas");
-      await renderToCanvas(canvas, format, data, 1.5);
+      await renderToCanvas(canvas, format, data, 3.0);
       const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/png"));
       if (!blob) throw new Error("render failed");
-
-      const filename = `hh-goa-2026-${format === "pfp" ? "pfp-frame" : "builder-id"}.png`;
-      const file = new File([blob], filename, { type: "image/png" });
-
-      // 1. Try Native Web Share API first (Mobile OS / supported desktop browsers)
-      if (
-        typeof navigator !== "undefined" &&
-        navigator.canShare &&
-        navigator.canShare({ files: [file] })
-      ) {
-        try {
-          await navigator.share({
-            title: "Hacker House Goa 2026",
-            text: SHARE_TEXT,
-            files: [file],
-          });
-          toast.success("Shared successfully! 🌴");
-          return;
-        } catch (err) {
-          if ((err as Error)?.name === "AbortError") return;
-        }
-      }
-
-      // 2. Desktop Fallback: Copy image to clipboard + download file + open X post intent
-      let copiedToClipboard = false;
-      if (
-        typeof navigator !== "undefined" &&
-        navigator.clipboard &&
-        typeof ClipboardItem !== "undefined"
-      ) {
-        try {
-          await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-          copiedToClipboard = true;
-        } catch {
-          /* clipboard access error fallback */
-        }
-      }
-
-      // Trigger automatic image download
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = filename;
+      a.download = `hh-goa-2026-${format === "pfp" ? "pfp-frame" : "builder-id"}-300dpi.png`;
       a.click();
       URL.revokeObjectURL(url);
-
-      // Open X post intent window
-      const tweetUrl = `https://x.com/intent/post?text=${encodeURIComponent(SHARE_TEXT)}`;
-      window.open(tweetUrl, "_blank", "noopener,noreferrer");
-
-      if (copiedToClipboard) {
-        toast.success(
-          "Image copied to clipboard & downloaded! Paste (Cmd+V / Ctrl+V) into your post 🌴",
-        );
-      } else {
-        toast.success("Image downloaded! Attach it to your X post 🌴");
-      }
+      toast.success("300 DPI High-Res Badge exported for printing 🖨️🌴");
     } catch {
-      toast.error("Sharing failed. Please try again.");
+      toast.error("Print export failed. Please try again.");
     } finally {
       setExporting(false);
     }
   };
 
+  const shareToX = () => {
+    const tweetUrl = `https://x.com/intent/post?text=${encodeURIComponent(SHARE_TEXT)}`;
+    window.open(tweetUrl, "_blank", "noopener,noreferrer");
+  };
+
   const hasPhoto = photos.length > 0;
 
   return (
-    <section id="studio" className="mx-auto w-full max-w-6xl px-5 py-14 sm:py-20">
+    <section id="studio" className="mx-auto w-full max-w-6xl px-5 py-6 sm:py-10">
       <div className="mb-8 flex flex-col items-center gap-4">
         <div className="inline-flex rounded-full border border-gold/40 bg-jungle/70 p-1">
           {[
@@ -341,11 +319,21 @@ export function FrameStudio({ format, onFormatChange }: Props) {
               </button>
               <button
                 onClick={shareToX}
-                disabled={exporting}
-                className="tracking-wider-caps inline-flex items-center justify-center gap-2 rounded-full bg-pink px-6 py-3.5 text-xs text-secondary-foreground transition-transform hover:scale-[1.02] disabled:opacity-70"
+                className="tracking-wider-caps inline-flex items-center justify-center gap-2 rounded-full bg-pink px-6 py-3.5 text-xs text-secondary-foreground transition-transform hover:scale-[1.02]"
               >
-                {exporting ? <Loader2 className="size-4 animate-spin" /> : null}
                 Share to X
+              </button>
+              <button
+                onClick={printBadge}
+                disabled={exporting}
+                className="tracking-wider-caps inline-flex items-center justify-center gap-2 rounded-full border border-gold/60 bg-gold/10 px-6 py-3.5 text-xs text-gold transition-transform hover:bg-gold/20 hover:scale-[1.02] disabled:opacity-70"
+              >
+                {exporting ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Printer className="size-4" />
+                )}
+                Print Badge (300 DPI)
               </button>
               <div className="flex gap-3">
                 <button
@@ -356,7 +344,7 @@ export function FrameStudio({ format, onFormatChange }: Props) {
                   Switch format
                 </button>
                 <button
-                  onClick={() => setPhotos([])}
+                  onClick={handleStartOver}
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-4 py-2.5 text-xs text-muted-foreground hover:text-pink"
                 >
                   <Trash2 className="size-3.5" />

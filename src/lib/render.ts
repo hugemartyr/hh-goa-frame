@@ -611,6 +611,7 @@ export async function renderToCanvas(
           document.fonts.load('400 1em "Space Grotesk"'),
           document.fonts.load('700 1em "Baloo 2"'),
           document.fonts.load('400 1em "JetBrains Mono"'),
+        ]);
       }
     } catch {
       /* font preloading fallback */

@@ -71,8 +71,18 @@ async function detectFocus(
 export async function loadPhoto(file: File): Promise<LoadedPhoto> {
   const blob = await toDecodableBlob(file);
   const bitmap = await decode(blob);
-  const width = "width" in bitmap ? bitmap.width : 0;
-  const height = "height" in bitmap ? bitmap.height : 0;
+  const width =
+    "naturalWidth" in bitmap && bitmap.naturalWidth
+      ? bitmap.naturalWidth
+      : "width" in bitmap
+        ? bitmap.width
+        : 0;
+  const height =
+    "naturalHeight" in bitmap && bitmap.naturalHeight
+      ? bitmap.naturalHeight
+      : "height" in bitmap
+        ? bitmap.height
+        : 0;
   const focus = await detectFocus(bitmap, width, height);
   return { bitmap, width, height, focus, previewUrl: URL.createObjectURL(blob) };
 }
@@ -90,6 +100,7 @@ export function drawPhotoCover(
   w: number,
   h: number,
 ) {
+  if (!photo || !photo.bitmap || !photo.width || !photo.height) return;
   const scale = Math.max(w / photo.width, h / photo.height);
   const dw = photo.width * scale;
   const dh = photo.height * scale;

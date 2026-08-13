@@ -180,6 +180,12 @@ function cornerMotif(
   ctx.restore();
 }
 
+function setLetterSpacing(ctx: CanvasRenderingContext2D, val: string) {
+  if ("letterSpacing" in ctx) {
+    (ctx as unknown as { letterSpacing: string }).letterSpacing = val;
+  }
+}
+
 function photoBlock(
   ctx: CanvasRenderingContext2D,
   photos: LoadedPhoto[],
@@ -189,9 +195,9 @@ function photoBlock(
   h: number,
   radius: number,
 ) {
-  const list = photos.slice(0, 3);
-  const gap = w * 0.018;
-  const cellW = (w - gap * (list.length - 1)) / list.length;
+  const list = (photos || []).filter((p) => Boolean(p && p.bitmap)).slice(0, 3);
+  const gap = list.length > 1 ? w * 0.018 : 0;
+  const cellW = list.length > 0 ? (w - gap * (list.length - 1)) / list.length : w;
   ctx.save();
   roundRect(ctx, x, y, w, h, radius);
   ctx.clip();
@@ -226,7 +232,7 @@ function tag(
 ) {
   ctx.font = `${size}px ${BODY}`;
   ctx.textBaseline = "middle";
-  ctx.letterSpacing = `${size * 0.12}px`;
+  setLetterSpacing(ctx, `${size * 0.12}px`);
   const padX = size * 0.9;
   const w = ctx.measureText(text).width + padX * 2;
   const h = size * 2.1;
@@ -236,7 +242,7 @@ function tag(
   ctx.fillStyle = fg;
   ctx.textAlign = "left";
   ctx.fillText(text, x + padX, y + h / 2 + size * 0.05);
-  ctx.letterSpacing = "0px";
+  setLetterSpacing(ctx, "0px");
   return w;
 }
 
@@ -291,11 +297,11 @@ export function renderPfp(ctx: CanvasRenderingContext2D, data: CardData, S: numb
   // top eyebrow
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.letterSpacing = `${9 * u}px`;
+  setLetterSpacing(ctx, `${9 * u}px`);
   ctx.font = `${26 * u}px ${BODY}`;
   ctx.fillStyle = PALETTE.goldSoft;
   ctx.fillText("BUILDERS COME TO SHIP · GOA", S / 2, 118 * u);
-  ctx.letterSpacing = "0px";
+  setLetterSpacing(ctx, "0px");
 
   // wordmark block
   const baseY = photoY + photoH + 66 * u;
@@ -308,7 +314,7 @@ export function renderPfp(ctx: CanvasRenderingContext2D, data: CardData, S: numb
   // 2026 chip + pink rules
   const chipY = baseY + 74 * u;
   ctx.font = `${44 * u}px ${DISPLAY}`;
-  ctx.letterSpacing = `${6 * u}px`;
+  setLetterSpacing(ctx, `${6 * u}px`);
   const chipW = ctx.measureText("2026").width + 56 * u;
   const chipH = 66 * u;
   roundRect(ctx, S / 2 - chipW / 2, chipY - chipH / 2, chipW, chipH, chipH / 2);
@@ -317,7 +323,7 @@ export function renderPfp(ctx: CanvasRenderingContext2D, data: CardData, S: numb
   ctx.fillStyle = PALETTE.cream;
   ctx.textBaseline = "middle";
   ctx.fillText("2026", S / 2, chipY + 3 * u);
-  ctx.letterSpacing = "0px";
+  setLetterSpacing(ctx, "0px");
 
   const ruleW = (size - chipW) / 2 - 34 * u;
   diamondRow(ctx, inset, chipY, ruleW, 9 * u, PALETTE.gold);
@@ -345,19 +351,19 @@ export function renderCard(ctx: CanvasRenderingContext2D, data: CardData, W: num
   ctx.textAlign = "left";
   ctx.fillStyle = PALETTE.gold;
   ctx.font = `${52 * u}px ${DISPLAY}`;
-  ctx.letterSpacing = `${2 * u}px`;
+  setLetterSpacing(ctx, `${2 * u}px`);
   ctx.fillText("HH GOA", pad, 126 * u);
   const hhW = ctx.measureText("HH GOA").width;
   ctx.fillStyle = PALETTE.pink;
   ctx.fillText("2026", pad + hhW + 16 * u, 126 * u);
-  ctx.letterSpacing = "0px";
+  setLetterSpacing(ctx, "0px");
 
   ctx.textAlign = "right";
   ctx.font = `${24 * u}px ${BODY}`;
-  ctx.letterSpacing = `${8 * u}px`;
+  setLetterSpacing(ctx, `${8 * u}px`);
   ctx.fillStyle = PALETTE.goldSoft;
   ctx.fillText("BUILDER ID", W - pad, 126 * u);
-  ctx.letterSpacing = "0px";
+  setLetterSpacing(ctx, "0px");
 
   scallopRow(ctx, pad, 176 * u, inner, 16 * u, "rgba(255,201,60,0.3)", true);
 
@@ -388,9 +394,9 @@ export function renderCard(ctx: CanvasRenderingContext2D, data: CardData, W: num
   ctx.fillStyle = PALETTE.deep;
   const tSize = fitText(ctx, data.title, inner - 130 * u, 46 * u, DISPLAY, 22);
   ctx.font = `${tSize}px ${DISPLAY}`;
-  ctx.letterSpacing = `${tSize * 0.06}px`;
+  setLetterSpacing(ctx, `${tSize * 0.06}px`);
   ctx.fillText(data.title, W / 2, bannerY + bannerH / 2 + 2 * u);
-  ctx.letterSpacing = "0px";
+  setLetterSpacing(ctx, "0px");
 
   // name
   const name = (data.name || "YOUR NAME").toUpperCase();
@@ -406,16 +412,16 @@ export function renderCard(ctx: CanvasRenderingContext2D, data: CardData, W: num
   const stack = (data.stack || "BUILDER").toUpperCase();
   const sSize = fitText(ctx, stack, inner, 34 * u, BODY, 18);
   ctx.font = `${sSize}px ${BODY}`;
-  ctx.letterSpacing = `${sSize * 0.16}px`;
+  setLetterSpacing(ctx, `${sSize * 0.16}px`);
   ctx.fillText(stack, pad, nameY + 66 * u);
-  ctx.letterSpacing = "0px";
+  setLetterSpacing(ctx, "0px");
 
   // badges
   const badgeY = nameY + 116 * u;
   const w1 = tag(ctx, "#FRAMEINGOA", pad, badgeY, 24 * u, "rgba(255,201,60,0.16)", PALETTE.gold);
   tag(
     ctx,
-    data.photos.length > 1 ? "TEAM FRAME" : "VERIFIED BUILDER",
+    (data.photos || []).filter(Boolean).length > 1 ? "TEAM FRAME" : "VERIFIED BUILDER",
     pad + w1 + 18 * u,
     badgeY,
     24 * u,
@@ -427,13 +433,13 @@ export function renderCard(ctx: CanvasRenderingContext2D, data: CardData, W: num
   diamondRow(ctx, pad, H - 148 * u, inner, 8 * u, "rgba(255,201,60,0.55)");
   ctx.textAlign = "left";
   ctx.font = `${24 * u}px ${BODY}`;
-  ctx.letterSpacing = `${6 * u}px`;
+  setLetterSpacing(ctx, `${6 * u}px`);
   ctx.fillStyle = PALETTE.goldSoft;
   ctx.fillText("HACKER HOUSE GOA", pad, H - 96 * u);
   ctx.textAlign = "right";
   ctx.fillStyle = "rgba(255,246,230,0.6)";
   ctx.fillText("HHGOA.COM", W - pad, H - 96 * u);
-  ctx.letterSpacing = "0px";
+  setLetterSpacing(ctx, "0px");
 
   cornerMotif(ctx, 110 * u, 110 * u, 52 * u, Math.PI);
   cornerMotif(ctx, W - 110 * u, H - 110 * u, 52 * u, 0);
@@ -447,8 +453,18 @@ export async function renderToCanvas(
   data: CardData,
   scale = 1,
 ) {
-  if (typeof document !== "undefined" && document.fonts?.ready) {
-    await document.fonts.ready;
+  if (typeof document !== "undefined" && document.fonts) {
+    try {
+      await document.fonts.ready;
+      if (document.fonts.load) {
+        await Promise.all([
+          document.fonts.load('400 1em "Anton"'),
+          document.fonts.load('400 1em "Space Grotesk"'),
+        ]);
+      }
+    } catch {
+      /* font preloading fallback */
+    }
   }
   const W = format === "pfp" ? 1600 : 1200;
   const H = format === "pfp" ? 1600 : 1500;

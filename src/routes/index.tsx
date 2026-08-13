@@ -66,8 +66,8 @@ function Index() {
             <span className="text-gold">FOR GOA</span>
           </h1>
           <p className="mt-5 max-w-md text-sm text-muted-foreground sm:text-base">
-            Drop a photo. Get a high-res Builder ID or PFP frame in seconds. Everything renders
-            in your browser — nothing is uploaded.
+            Drop a photo. Get a high-res Builder ID or PFP frame in seconds. Everything renders in
+            your browser — nothing is uploaded.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <button
@@ -96,7 +96,7 @@ function Index() {
             <FramePreview
               format="card"
               data={{
-                photos: [demo],
+                photos: demo ? [demo] : [],
                 name: "Aarav Mehta",
                 stack: "Rust · Solidity · Design",
                 title: "THE TERMINAL WIZARD",
